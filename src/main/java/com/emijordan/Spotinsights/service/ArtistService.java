@@ -1,0 +1,83 @@
+package com.emijordan.Spotinsights.service;
+
+import com.emijordan.Spotinsights.client.Mappers;
+import com.emijordan.Spotinsights.client.SpotifyApiClient;
+import com.emijordan.Spotinsights.dto.ArtistDTO;
+import com.emijordan.Spotinsights.dto.ItemDTO;
+import com.emijordan.Spotinsights.entities.Artist;
+import com.emijordan.Spotinsights.entities.Genre;
+import com.emijordan.Spotinsights.repository.ArtistRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class ArtistService {
+
+    @Autowired
+    private SpotifyApiClient spotifyApiClient;
+
+    @Autowired
+    private ArtistRepository artistRepository;
+
+    @Autowired
+    private GenreService genreService;
+
+//    -----------------------------------------------------------
+    public Artist getAlbumArtist(ItemDTO itemDTO){
+        ArtistDTO albumArtistDto = getPrincipalAlbumArtist(itemDTO.song().album().artists());
+        Artist albumArtist = saveArtist(albumArtistDto);
+        return albumArtist;
+    }
+
+    public List<Artist> getArtist(ItemDTO itemDTO){
+        List<ArtistDTO> artistsDTOS = itemDTO.song().artists().stream()
+                .map(a-> getArtistFromApi(a.idSpotify()))
+                .collect(Collectors.toList());
+
+        List<Artist> artists = artistsDTOS.stream()
+                .map(a-> saveArtist(a))
+                .collect(Collectors.toList());
+
+        return artists;
+    }
+
+    //    -----------------------------------------------------------
+
+
+    public ArtistDTO getPrincipalAlbumArtist(List<ArtistDTO> albumArtistsDTO){
+        List<ArtistDTO> albumsArtists = albumArtistsDTO.stream()
+                .map(a-> getArtistFromApi(a.idSpotify()))
+                .collect(Collectors.toList());
+        return albumsArtists.get(0); //supposedly there can be more than 1, return the principal
+    }
+
+    //obtengo un nuevo dto ya que el anterior no tiene los generos
+    public ArtistDTO getArtistFromApi(String idArtist){
+        String json = spotifyApiClient.getArtist(idArtist);
+        ArtistDTO artistDTO = Mappers.convertData(json, ArtistDTO.class);
+        return artistDTO;
+    }
+
+    public Artist saveArtist(ArtistDTO artistDto){
+        Artist artist = new Artist(artistDto);
+        //verifico si los generos ya estan en la bd y los vinculo
+        for (int i = 0; i < artist.getGenres().size(); i++) {
+            Genre persistedGenre = genreService.saveGenre(artist.getGenres().get(i));
+            artist.getGenres().set(i, persistedGenre);
+        }
+
+        //persisto los artistas en la bd
+        Optional<Artist> existingArtist = artistRepository.findByIdSpotify(artist.getIdSpotify());
+        if (existingArtist.isEmpty()){
+            Artist persistedArtist = artistRepository.save(artist);
+            return persistedArtist;
+        }
+        return existingArtist.get();
+    }
+
+
+}
