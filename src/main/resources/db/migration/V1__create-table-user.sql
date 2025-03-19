@@ -1,0 +1,5 @@
+CREATE TABLE "user" (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    id_spotify VARCHAR(50) UNIQUE NOT NULL
+);
