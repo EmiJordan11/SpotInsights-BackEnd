@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -32,20 +33,27 @@ public class Song {
     private List<Artist> artists;
     private String idSpotify;
 
-    public Song(SongDTO songDTO) {
+
+    public Song(SongDTO songDTO, Album album, List<Artist> artists) {
         this.name = songDTO.name();
         this.popularity = songDTO.popularity();
         this.durationMs = songDTO.durationMs();
+        this.album = album;
+        this.artists = artists;
         this.idSpotify = songDTO.idSpotify();
     }
 
     @Override
     public String toString() {
-        return "Song{" +
+        return "Song{" + '\n' +
                 "id: " + id + '\n' +
                 "name: " + name + '\n' +
                 "popularity: " + popularity + '\n' +
-                "durationMs:" + durationMs + '\n' +
+                "durationMs: " + durationMs + '\n' +
+                "album name: " + album.getName() + '\n' +
+                "artists: " + artists.stream()
+                            .map(a-> a.getName())
+                            .collect(Collectors.joining(", ")) + '\n' +
                 "idSpotify: " + idSpotify + '\n' +
                 '}';
     }

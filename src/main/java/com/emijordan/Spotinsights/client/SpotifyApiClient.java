@@ -18,12 +18,10 @@ public class SpotifyApiClient {
     @Value("${access.token}")
     private String auth_token;
 
-    public String get_artist(){
-
-        System.out.println(auth_token);
+    public String getApiResponse(String url){
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.spotify.com/v1/me/player/recently-played?limit=2"))
+                .uri(URI.create(url))
                 .headers("Authorization", "Bearer " + auth_token)
                 .GET()
                 .build();
@@ -44,5 +42,17 @@ public class SpotifyApiClient {
         }
 
         return null;
+    }
+
+    public String getUser(){
+        return getApiResponse("https://api.spotify.com/v1/me");
+    }
+
+    public String getRecentlyPlayed(){
+        return getApiResponse("https://api.spotify.com/v1/me/player/recently-played?limit=50");
+    }
+
+    public String getArtist(String idArtist){
+        return getApiResponse("https://api.spotify.com/v1/artists/" + idArtist);
     }
 }

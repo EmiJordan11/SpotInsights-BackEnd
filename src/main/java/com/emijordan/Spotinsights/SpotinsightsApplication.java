@@ -4,6 +4,8 @@ import com.emijordan.Spotinsights.client.Mappers;
 import com.emijordan.Spotinsights.client.SpotifyApiClient;
 import com.emijordan.Spotinsights.dto.SongDTO;
 import com.emijordan.Spotinsights.dto.SpotifyApiResponse;
+import com.emijordan.Spotinsights.dto.UserDTO;
+import com.emijordan.Spotinsights.service.SpotifyDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +17,7 @@ import java.util.List;
 public class SpotinsightsApplication implements CommandLineRunner{
 
 	@Autowired
-	private SpotifyApiClient client;
+	private SpotifyDataService service;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpotinsightsApplication.class, args);
@@ -23,10 +25,15 @@ public class SpotinsightsApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		String json = client.get_artist();
-//		System.out.println(json);
-		SpotifyApiResponse response = Mappers.convertData(json, SpotifyApiResponse.class);
-		response.items().stream().forEach(i-> System.out.println(i.song()));
+		service.getData();
+
+//		String json = client.getUser();
+//		UserDTO user = Mappers.convertData(json, UserDTO.class);
+//		System.out.println(user);
+
+
+//		SpotifyApiResponse response = Mappers.convertData(json, SpotifyApiResponse.class);
+//		response.items().stream().forEach(i-> System.out.println(i.song()));
 	}
 
 }
