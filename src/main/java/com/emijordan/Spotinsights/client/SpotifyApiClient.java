@@ -2,6 +2,7 @@ package com.emijordan.Spotinsights.client;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,16 +14,17 @@ import java.net.http.HttpResponse;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
+@Setter
 @Component
 public class SpotifyApiClient {
-    @Value("${access.token}")
-    private String auth_token;
+
+    private String authToken;
 
     public String getApiResponse(String url){
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .headers("Authorization", "Bearer " + auth_token)
+                .headers("Authorization", "Bearer " + authToken)
                 .GET()
                 .build();
 

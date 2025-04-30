@@ -19,14 +19,14 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User getUser(){
+    public User getUser(String userRefreshToken){
         UserDTO userDTO = getUserFromApi();
-        User user = saveUser(userDTO);
+        User user = saveUser(userDTO, userRefreshToken);
         return user;
     }
 
-    public User saveUser(UserDTO userDTO){
-        User user = new User(userDTO);
+    public User saveUser(UserDTO userDTO, String userRefreshToken){
+        User user = new User(userDTO, userRefreshToken);
         Optional<User> existingUser = userRepository.findByIdSpotify(user.getIdSpotify());
         if (existingUser.isEmpty()){
             User persistedUser = userRepository.save(user);

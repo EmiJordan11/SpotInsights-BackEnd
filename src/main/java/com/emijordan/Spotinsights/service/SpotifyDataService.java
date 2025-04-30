@@ -36,9 +36,12 @@ public class SpotifyDataService {
     @Autowired
     private ReproductionService reproductionService;
 
-    public void getData(){
+    public void getData(TokenResponse spotifyTokens){
+        //Set authToken
+        spotifyApiClient.setAuthToken(spotifyTokens.accessToken());
+
         //User
-        User user = userService.getUser();
+        User user = userService.getUser(spotifyTokens.refreshToken());
 
         SpotifyApiResponse response = getApiResponse();
         for (ItemDTO i: response.items()){

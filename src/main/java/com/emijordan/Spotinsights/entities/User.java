@@ -19,10 +19,12 @@ public class User {
     private Long id;
     private String name;
     private String idSpotify;
+    private String refreshToken;
 
-    public User(UserDTO userDTO) {
+    public User(UserDTO userDTO, String userRefreshToken) {
         this.name = userDTO.name();
         this.idSpotify = userDTO.idSpotify();
+        this.refreshToken = userRefreshToken;
     }
 
     @Override

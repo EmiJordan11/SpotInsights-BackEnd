@@ -14,26 +14,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.List;
 
 @SpringBootApplication
-public class SpotinsightsApplication implements CommandLineRunner{
+public class SpotinsightsApplication{
 
-	@Autowired
-	private SpotifyDataService service;
+//	@Autowired
+//	private SpotifyDataService service;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpotinsightsApplication.class, args);
 	}
 
-	@Override
-	public void run(String... args) throws Exception {
-		service.getData();
-
-//		String json = client.getUser();
-//		UserDTO user = Mappers.convertData(json, UserDTO.class);
-//		System.out.println(user);
-
-
-//		SpotifyApiResponse response = Mappers.convertData(json, SpotifyApiResponse.class);
-//		response.items().stream().forEach(i-> System.out.println(i.song()));
-	}
+//	@Override
+//	public void run(String... args) throws Exception {
+//		service.getData();
+//	}
 
 }
