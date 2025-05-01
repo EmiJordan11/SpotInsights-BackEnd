@@ -5,6 +5,7 @@ import com.emijordan.Spotinsights.client.SpotifyApiClient;
 import com.emijordan.Spotinsights.dto.UserDTO;
 import com.emijordan.Spotinsights.entities.User;
 import com.emijordan.Spotinsights.repository.UserRepository;
+import com.emijordan.Spotinsights.service.auth.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +20,19 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TokenService tokenService;
+
     public User getUser(String userRefreshToken){
         UserDTO userDTO = getUserFromApi();
-        User user = saveUser(userDTO, userRefreshToken);
+        String encryptRefreshToken = tokenService.encryptToken(userRefreshToken);
+
+        User user = saveUser(userDTO, encryptRefreshToken);
         return user;
     }
 
-    public User saveUser(UserDTO userDTO, String userRefreshToken){
-        User user = new User(userDTO, userRefreshToken);
+    public User saveUser(UserDTO userDTO, String encryptRefreshToken){
+        User user = new User(userDTO, encryptRefreshToken);
         Optional<User> existingUser = userRepository.findByIdSpotify(user.getIdSpotify());
         if (existingUser.isEmpty()){
             User persistedUser = userRepository.save(user);

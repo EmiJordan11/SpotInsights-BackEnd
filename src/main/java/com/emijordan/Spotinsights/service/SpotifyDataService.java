@@ -37,7 +37,7 @@ public class SpotifyDataService {
     private ReproductionService reproductionService;
 
     public void getData(TokenResponse spotifyTokens){
-        //Set authToken
+        //Set accessToken
         spotifyApiClient.setAuthToken(spotifyTokens.accessToken());
 
         //User
