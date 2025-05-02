@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/sync-data")
+@CrossOrigin(origins = "http://localhost:5173")
 public class DataSyncController {
 
     @Autowired
@@ -16,6 +17,7 @@ public class DataSyncController {
     @PostMapping
     public ResponseEntity syncData(@RequestParam(name = "code") String code){
         spotifyAuthService.spotifyAuth(code);
+        System.out.println("Datos obtenidos correctamente");
         return ResponseEntity.noContent().build();
     }
 }

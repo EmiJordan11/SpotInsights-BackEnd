@@ -55,7 +55,8 @@ public class SpotifyAuthService {
             if (response.statusCode()==200){
                 return response.body();
             } else{
-                throw new RuntimeException("Error al obtener los token de Spotify: " + response.body());
+//                throw new RuntimeException("Error al obtener los token de Spotify: " + response.body());
+                throw new RuntimeException(response.body());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
