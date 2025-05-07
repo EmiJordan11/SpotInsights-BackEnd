@@ -38,8 +38,6 @@ public class UserService {
             User persistedUser = userRepository.save(user);
             return persistedUser;
         }
-//        System.out.println("Refresh token almacenado: " + tokenService.decryptToken(existingUser.get().getRefreshToken()));
-//        System.out.println("Refresh token nuevo: " + tokenService.decryptToken(encryptRefreshToken));
         return existingUser.get();
     }
 

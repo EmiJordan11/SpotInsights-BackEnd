@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,10 +20,9 @@ public class ReproductionService {
     @Autowired
     private ReproductionRepository reproductionRepository;
 
-    public Reproduction getReproduction(ItemDTO itemDTO, User user, Song song){
+    public Reproduction buildReproduction(ItemDTO itemDTO, User user, Song song){
         LocalDateTime dateTime = formatDateTime(itemDTO.played_at());
-        Reproduction reproduction = new Reproduction(itemDTO, dateTime, user, song);
-        return saveReproduction(reproduction);
+        return new Reproduction(itemDTO, dateTime, user, song);
     }
 
     public Reproduction saveReproduction(Reproduction reproduction){
@@ -39,4 +39,15 @@ public class ReproductionService {
         Instant instant = Instant.parse(dateTime);
         return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
+
+
+    public void saveAll(List<Reproduction> newReproductions) {
+        reproductionRepository.saveAll(newReproductions);
+    }
+
+//    public Reproduction getReproduction(ItemDTO itemDTO, User user, Song song){
+//        LocalDateTime dateTime = formatDateTime(itemDTO.played_at());
+//        Reproduction reproduction = new Reproduction(itemDTO, dateTime, user, song);
+//        return saveReproduction(reproduction);
+//    }
 }

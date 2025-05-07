@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,21 +33,6 @@ public class ArtistService {
         Artist albumArtist = saveArtist(albumArtistDto);
         return albumArtist;
     }
-
-    public List<Artist> getArtist(ItemDTO itemDTO){
-        List<ArtistDTO> artistsDTOS = itemDTO.song().artists().stream()
-                .map(a-> getArtistFromApi(a.idSpotify()))
-                .collect(Collectors.toList());
-
-        List<Artist> artists = artistsDTOS.stream()
-                .map(a-> saveArtist(a))
-                .collect(Collectors.toList());
-
-        return artists;
-    }
-
-    //    -----------------------------------------------------------
-
 
     public ArtistDTO getPrincipalAlbumArtist(List<ArtistDTO> albumArtistsDTO){
         List<ArtistDTO> albumsArtists = albumArtistsDTO.stream()
@@ -70,14 +56,80 @@ public class ArtistService {
             artist.getGenres().set(i, persistedGenre);
         }
 
-        //persisto los artistas en la bd
-        Optional<Artist> existingArtist = artistRepository.findByIdSpotify(artist.getIdSpotify());
-        if (existingArtist.isEmpty()){
-            Artist persistedArtist = artistRepository.save(artist);
-            return persistedArtist;
-        }
-        return existingArtist.get();
+        Artist persistedArtist = artistRepository.save(artist);
+        return persistedArtist;
     }
 
+    //new
+    public List<Artist> getExistingArtists(Set artistIds) {
+        return artistRepository.findByIdSpotifyIn(artistIds);
+    }
 
+    //BUILD
+    public List<Artist> buildArtists(List<ArtistDTO> newArtistDTOList){
+        //los artistDto que tengo no tienen los generos, debo hacer una llamada especifica a la API para obtenerlos
+        List<ArtistDTO> artistsDTOS = newArtistDTOList.stream()
+                .map(artistDTO -> getArtistFromApi(artistDTO.idSpotify()))
+                .toList();
+
+        //mappeo los dto a entidades
+        List<Artist> artists = artistsDTOS.stream()
+                .map(Artist::new)
+                .toList();
+
+        //verifico si los generos ya estan en la bd y los vinculo
+        for (Artist artist: artists){
+            for (int i = 0; i < artist.getGenres().size(); i++) {
+                Genre persistedGenre = genreService.saveGenre(artist.getGenres().get(i));
+                artist.getGenres().set(i, persistedGenre);
+            }
+        }
+
+        return artists;
+    }
+
+    //SAVE ALL
+    public void saveAll(List<Artist> artists) {
+        artistRepository.saveAll(artists);
+    }
 }
+
+
+
+//    public List<Artist> getArtist(ItemDTO itemDTO){
+//        List<ArtistDTO> artistsDTOS = itemDTO.song().artists().stream()
+//                .map(a-> getArtistFromApi(a.idSpotify()))
+//                .collect(Collectors.toList());
+//
+//        List<Artist> artists = artistsDTOS.stream()
+//                .map(a-> saveArtist(a))
+//                .collect(Collectors.toList());
+//
+//        return artists;
+//    }
+
+//    -----------------------------------------------------------
+
+
+
+//    public List<Artist> getArtists(List<ArtistDTO> newArtistsDto){
+//        //los artistDto que tengo no tienen los generos, debo hacer una llamada especifica a la API para obtenerlos
+//        List<ArtistDTO> artistsDTOS = newArtistsDto.stream()
+//                .map(artistDTO -> getArtistFromApi(artistDTO.idSpotify()))
+//                .toList();
+//
+//        //mappeo los dto a entidades
+//        List<Artist> artists = artistsDTOS.stream()
+//                .map(Artist::new)
+//                .toList();
+//
+//        //verifico si los generos ya estan en la bd y los vinculo
+//        for (Artist artist: artists){
+//            for (int i = 0; i < artist.getGenres().size(); i++) {
+//                Genre persistedGenre = genreService.saveGenre(artist.getGenres().get(i));
+//                artist.getGenres().set(i, persistedGenre);
+//            }
+//        }
+//
+//        return artistRepository.saveAll(artists);
+//    }
