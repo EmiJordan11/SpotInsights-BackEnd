@@ -39,7 +39,9 @@ public class Reproduction {
                 "user: " + user.getName() + "\n" +
                 "song: '" + song.getName() + "'\n" +
                 "album: '" + song.getAlbum().getName() + "'\n" +
-                "album artist: " + song.getAlbum().getArtist().getName() + "\n" +
+                "album artists: " + song.getAlbum().getArtists().stream()
+                                    .map(a-> a.getName())
+                                    .collect(Collectors.joining(", ")) + "\n" +
                 "artists: " + song.getArtists().stream()
                                 .map(a-> a.getName())
                                 .collect(Collectors.joining(" ,")) + "\n" +

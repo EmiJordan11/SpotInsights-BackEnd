@@ -45,9 +45,4 @@ public class ReproductionService {
         reproductionRepository.saveAll(newReproductions);
     }
 
-//    public Reproduction getReproduction(ItemDTO itemDTO, User user, Song song){
-//        LocalDateTime dateTime = formatDateTime(itemDTO.played_at());
-//        Reproduction reproduction = new Reproduction(itemDTO, dateTime, user, song);
-//        return saveReproduction(reproduction);
-//    }
 }

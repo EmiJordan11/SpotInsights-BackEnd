@@ -27,20 +27,6 @@ public class ArtistService {
     @Autowired
     private GenreService genreService;
 
-//    -----------------------------------------------------------
-    public Artist getAlbumArtist(ItemDTO itemDTO){
-        ArtistDTO albumArtistDto = getPrincipalAlbumArtist(itemDTO.song().album().artists());
-        Artist albumArtist = saveArtist(albumArtistDto);
-        return albumArtist;
-    }
-
-    public ArtistDTO getPrincipalAlbumArtist(List<ArtistDTO> albumArtistsDTO){
-        List<ArtistDTO> albumsArtists = albumArtistsDTO.stream()
-                .map(a-> getArtistFromApi(a.idSpotify()))
-                .collect(Collectors.toList());
-        return albumsArtists.get(0); //supposedly there can be more than 1, return the principal
-    }
-
     //obtengo un nuevo dto ya que el anterior no tiene los generos
     public ArtistDTO getArtistFromApi(String idArtist){
         String json = spotifyApiClient.getArtist(idArtist);
@@ -48,24 +34,10 @@ public class ArtistService {
         return artistDTO;
     }
 
-    public Artist saveArtist(ArtistDTO artistDto){
-        Artist artist = new Artist(artistDto);
-        //verifico si los generos ya estan en la bd y los vinculo
-        for (int i = 0; i < artist.getGenres().size(); i++) {
-            Genre persistedGenre = genreService.saveGenre(artist.getGenres().get(i));
-            artist.getGenres().set(i, persistedGenre);
-        }
-
-        Artist persistedArtist = artistRepository.save(artist);
-        return persistedArtist;
-    }
-
-    //new
     public List<Artist> getExistingArtists(Set artistIds) {
         return artistRepository.findByIdSpotifyIn(artistIds);
     }
 
-    //BUILD
     public List<Artist> buildArtists(List<ArtistDTO> newArtistDTOList){
         //los artistDto que tengo no tienen los generos, debo hacer una llamada especifica a la API para obtenerlos
         List<ArtistDTO> artistsDTOS = newArtistDTOList.stream()
@@ -88,48 +60,7 @@ public class ArtistService {
         return artists;
     }
 
-    //SAVE ALL
     public void saveAll(List<Artist> artists) {
         artistRepository.saveAll(artists);
     }
 }
-
-
-
-//    public List<Artist> getArtist(ItemDTO itemDTO){
-//        List<ArtistDTO> artistsDTOS = itemDTO.song().artists().stream()
-//                .map(a-> getArtistFromApi(a.idSpotify()))
-//                .collect(Collectors.toList());
-//
-//        List<Artist> artists = artistsDTOS.stream()
-//                .map(a-> saveArtist(a))
-//                .collect(Collectors.toList());
-//
-//        return artists;
-//    }
-
-//    -----------------------------------------------------------
-
-
-
-//    public List<Artist> getArtists(List<ArtistDTO> newArtistsDto){
-//        //los artistDto que tengo no tienen los generos, debo hacer una llamada especifica a la API para obtenerlos
-//        List<ArtistDTO> artistsDTOS = newArtistsDto.stream()
-//                .map(artistDTO -> getArtistFromApi(artistDTO.idSpotify()))
-//                .toList();
-//
-//        //mappeo los dto a entidades
-//        List<Artist> artists = artistsDTOS.stream()
-//                .map(Artist::new)
-//                .toList();
-//
-//        //verifico si los generos ya estan en la bd y los vinculo
-//        for (Artist artist: artists){
-//            for (int i = 0; i < artist.getGenres().size(); i++) {
-//                Genre persistedGenre = genreService.saveGenre(artist.getGenres().get(i));
-//                artist.getGenres().set(i, persistedGenre);
-//            }
-//        }
-//
-//        return artistRepository.saveAll(artists);
-//    }

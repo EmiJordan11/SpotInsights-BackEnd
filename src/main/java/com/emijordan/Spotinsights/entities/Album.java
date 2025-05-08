@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,14 +22,19 @@ public class Album {
     private String name;
     private String type;
     private String idSpotify;
-    @ManyToOne
-    private Artist artist;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "album_artist",
+            joinColumns = @JoinColumn(name = "id_album"),
+            inverseJoinColumns = @JoinColumn(name = "id_artist")
+    )
+    private List<Artist> artists;
 
-    public Album(AlbumDTO albumDTO, Artist artist) {
+    public Album(AlbumDTO albumDTO, List<Artist> artist) {
         this.name = albumDTO.name();
         this.type = albumDTO.type();
         this.idSpotify = albumDTO.idSpotify();
-        this.artist = artist;
+        this.artists = artist;
     }
 
     @Override
@@ -36,7 +44,9 @@ public class Album {
                 "name: " + name + "\n" +
                 "type: " + type + "\n" +
                 "idSpotify: " + idSpotify + "\n" +
-                "artist name: " + artist.getName() + "\n" +
+                "artists: " + artists.stream()
+                            .map(a-> a.getName())
+                            .collect(Collectors.joining(", ")) + '\n' +
                 '}';
     }
 }

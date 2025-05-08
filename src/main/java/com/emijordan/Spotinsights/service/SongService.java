@@ -31,18 +31,4 @@ public class SongService {
         songRepository.saveAll(newSongs);
     }
 
-
-
-//    public Song saveSong(Song song){
-//        Song persistedSong = songRepository.save(song);
-//        return persistedSong;
-//    }
-
-//    public Song getSong(ItemDTO itemDTO, Album album, List<Artist> artists){
-//        Song song = new Song(itemDTO.song(), album, artists);
-//        Song existSong = saveSong(song);
-//        return existSong; //cambiar nombre
-//    }
-
-
 }

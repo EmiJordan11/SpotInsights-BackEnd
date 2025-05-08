@@ -21,21 +21,12 @@ public class AlbumService {
         return albumRepository.findByIdSpotifyIn(albumIds);
     }
 
-    public Album buildAlbum(AlbumDTO albumDTO, Artist artist){
-        return new Album(albumDTO, artist);
+    public Album buildAlbum(AlbumDTO albumDTO, List<Artist> artists){
+        return new Album(albumDTO, artists);
     }
 
     public void saveAll(List<Album> newAlbums) {
         albumRepository.saveAll(newAlbums);
     }
 
-//    public Album getAlbum(AlbumDTO albumDTO, Artist artist){
-//        Album album = new Album(albumDTO, artist);
-//        Album existAlbum = saveAlbum(album);
-//        return existAlbum;
-//    }
-//    public Album saveAlbum(Album album){
-//        Album persistedAlbum = albumRepository.save(album);
-//        return persistedAlbum;
-//    }
 }
