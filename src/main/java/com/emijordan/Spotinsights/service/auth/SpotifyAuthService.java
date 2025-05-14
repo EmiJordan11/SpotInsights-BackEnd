@@ -21,6 +21,9 @@ public class SpotifyAuthService {
     @Value("${encoded.credentials}")
     private String encodedCredentials;
 
+    @Value("${redirect.uri}")
+    private String redirectUri;
+
     @Autowired
     private SpotifyDataService spotifyDataService;
 
@@ -37,7 +40,7 @@ public class SpotifyAuthService {
         //body
         String requestBody = "grant_type=authorization_code"
                 + "&code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
-                + "&redirect_uri=" + URLEncoder.encode("http://localhost:5173/dashboard", StandardCharsets.UTF_8);
+                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8);
 
 
         HttpRequest request = HttpRequest.newBuilder()

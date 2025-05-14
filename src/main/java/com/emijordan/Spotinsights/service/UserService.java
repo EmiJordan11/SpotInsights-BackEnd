@@ -25,6 +25,9 @@ public class UserService {
 
     public User getUser(String userRefreshToken){
         UserDTO userDTO = getUserFromApi();
+        //BORRAR
+        System.out.println("Refresh Token: " + userRefreshToken);
+        //
         String encryptRefreshToken = tokenService.encryptToken(userRefreshToken);
 
         User user = saveUser(userDTO, encryptRefreshToken);
@@ -38,6 +41,7 @@ public class UserService {
             User persistedUser = userRepository.save(user);
             return persistedUser;
         }
+        existingUser.get().setRefreshToken(encryptRefreshToken); //actualizo el refresh token
         return existingUser.get();
     }
 

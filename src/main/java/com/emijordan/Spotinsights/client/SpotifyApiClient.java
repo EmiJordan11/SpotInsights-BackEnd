@@ -12,8 +12,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-//@AllArgsConstructor
-//@NoArgsConstructor
 @Setter
 @Component
 public class SpotifyApiClient {
@@ -57,4 +55,5 @@ public class SpotifyApiClient {
     public String getArtist(String idArtist){
         return getApiResponse("https://api.spotify.com/v1/artists/" + idArtist);
     }
+
 }
