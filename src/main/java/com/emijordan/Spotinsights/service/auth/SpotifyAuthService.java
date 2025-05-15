@@ -1,8 +1,11 @@
 package com.emijordan.Spotinsights.service.auth;
 
 import com.emijordan.Spotinsights.client.Mappers;
+import com.emijordan.Spotinsights.controller.DataSyncController;
 import com.emijordan.Spotinsights.dto.TokenResponse;
 import com.emijordan.Spotinsights.service.SpotifyDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ public class SpotifyAuthService {
     @Autowired
     private SpotifyDataService spotifyDataService;
 
+    private static final Logger logger = LoggerFactory.getLogger(DataSyncController.class);
+
     public void spotifyAuth(String code) {
         String response = getSpotifyTokens(code);
 
@@ -42,7 +47,6 @@ public class SpotifyAuthService {
                 + "&code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8);
 
-
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://accounts.spotify.com/api/token"))
                 .headers("Content-type", "application/x-www-form-urlencoded")
@@ -56,6 +60,7 @@ public class SpotifyAuthService {
                     .send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode()==200){
+                logger.info("Tokens obtenidos correctamente");
                 return response.body();
             } else{
 //                throw new RuntimeException("Error al obtener los token de Spotify: " + response.body());

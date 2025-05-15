@@ -22,7 +22,7 @@ public class DataSyncController {
     public ResponseEntity syncData(@RequestParam(name = "code") String code){
         logger.info("🟢 INICIO PROCESO POST LOGIN: nuevo usuario logueado desde el Front\n");
         spotifyAuthService.spotifyAuth(code);
-        logger.info("\n🔴 FIN DEL PROCESO POST LOGIN: Datos obtenidos correctament\n");
+        logger.info("\n🔴 FIN DEL PROCESO POST LOGIN: Datos obtenidos correctamente\n");
         return ResponseEntity.noContent().build();
     }
 }

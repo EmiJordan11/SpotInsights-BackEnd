@@ -28,8 +28,8 @@ public class ArtistService {
     private GenreService genreService;
 
     //obtengo un nuevo dto ya que el anterior no tiene los generos
-    public ArtistDTO getArtistFromApi(String idArtist){
-        String json = spotifyApiClient.getArtist(idArtist);
+    public ArtistDTO getArtistFromApi(String idArtist, String accessToken){
+        String json = spotifyApiClient.getArtist(idArtist, accessToken);
         ArtistDTO artistDTO = Mappers.convertData(json, ArtistDTO.class);
         return artistDTO;
     }
@@ -38,10 +38,10 @@ public class ArtistService {
         return artistRepository.findByIdSpotifyIn(artistIds);
     }
 
-    public List<Artist> buildArtists(List<ArtistDTO> newArtistDTOList){
+    public List<Artist> buildArtists(List<ArtistDTO> newArtistDTOList, String accessToken){
         //los artistDto que tengo no tienen los generos, debo hacer una llamada especifica a la API para obtenerlos
         List<ArtistDTO> artistsDTOS = newArtistDTOList.stream()
-                .map(artistDTO -> getArtistFromApi(artistDTO.idSpotify()))
+                .map(artistDTO -> getArtistFromApi(artistDTO.idSpotify(), accessToken))
                 .toList();
 
         //mappeo los dto a entidades

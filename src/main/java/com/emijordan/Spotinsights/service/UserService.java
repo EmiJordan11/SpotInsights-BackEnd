@@ -2,6 +2,7 @@ package com.emijordan.Spotinsights.service;
 
 import com.emijordan.Spotinsights.client.Mappers;
 import com.emijordan.Spotinsights.client.SpotifyApiClient;
+import com.emijordan.Spotinsights.dto.TokenResponse;
 import com.emijordan.Spotinsights.dto.UserDTO;
 import com.emijordan.Spotinsights.entities.User;
 import com.emijordan.Spotinsights.repository.UserRepository;
@@ -23,9 +24,9 @@ public class UserService {
     @Autowired
     private TokenService tokenService;
 
-    public User getUser(String userRefreshToken){
-        UserDTO userDTO = getUserFromApi();
-        String encryptRefreshToken = tokenService.encryptToken(userRefreshToken);
+    public User getUser(TokenResponse tokens){
+        UserDTO userDTO = getUserFromApi(tokens.accessToken());
+        String encryptRefreshToken = tokenService.encryptToken(tokens.refreshToken());
 
         User user = saveUser(userDTO, encryptRefreshToken);
         return user;
@@ -47,8 +48,8 @@ public class UserService {
         return updateUser;
     }
 
-    public UserDTO getUserFromApi(){
-        String userJson = spotifyApiClient.getUser();
+    public UserDTO getUserFromApi(String accessToken){
+        String userJson = spotifyApiClient.getUser(accessToken);
         UserDTO userDTO = Mappers.convertData(userJson, UserDTO.class);
         return userDTO;
     }

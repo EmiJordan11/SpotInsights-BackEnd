@@ -16,13 +16,11 @@ import java.net.http.HttpResponse;
 @Component
 public class SpotifyApiClient {
 
-    private String authToken;
-
-    public String getApiResponse(String url){
+    public String getApiResponse(String url, String accessToken){
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .headers("Authorization", "Bearer " + authToken)
+                .headers("Authorization", "Bearer " + accessToken)
                 .GET()
                 .build();
 
@@ -44,16 +42,16 @@ public class SpotifyApiClient {
         return null;
     }
 
-    public String getUser(){
-        return getApiResponse("https://api.spotify.com/v1/me");
+    public String getUser(String accessToken){
+        return getApiResponse("https://api.spotify.com/v1/me", accessToken);
     }
 
-    public String getRecentlyPlayed(){
-        return getApiResponse("https://api.spotify.com/v1/me/player/recently-played?limit=50");
+    public String getRecentlyPlayed(String accessToken){
+        return getApiResponse("https://api.spotify.com/v1/me/player/recently-played?limit=50", accessToken);
     }
 
-    public String getArtist(String idArtist){
-        return getApiResponse("https://api.spotify.com/v1/artists/" + idArtist);
+    public String getArtist(String idArtist, String accessToken){
+        return getApiResponse("https://api.spotify.com/v1/artists/" + idArtist, accessToken);
     }
 
 }

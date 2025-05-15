@@ -39,38 +39,31 @@ public class SpotifyDataService {
 
     //Obtener data post login en el front
     public void syncDataAfterLogin(TokenResponse spotifyTokens){
-        //Set accessToken
-        spotifyApiClient.setAuthToken(spotifyTokens.accessToken());
-
         //USER
-        User user = userService.getUser(spotifyTokens.refreshToken());
+        User user = userService.getUser(spotifyTokens);
 
         logger.info("Nuevo usuario registrado: "+user.getName());
 
-        syncSpotifyData(user);
+        syncSpotifyData(user, spotifyTokens.accessToken());
     }
 
     //Actualizar data (tarea automatizada)
     public void scheduledSyncForExistingUsers(String accessToken, User user){
-        //Set accessToken
-        spotifyApiClient.setAuthToken(accessToken);
-
-        syncSpotifyData(user);
-
+        syncSpotifyData(user, accessToken);
     }
 
-    public SpotifyApiResponse getApiResponse(){
-        String json = spotifyApiClient.getRecentlyPlayed();
+    public SpotifyApiResponse getApiResponse(String accessToken){
+        String json = spotifyApiClient.getRecentlyPlayed(accessToken);
         SpotifyApiResponse response = Mappers.convertData(json, SpotifyApiResponse.class);
         return response;
     }
 
 
     //Logica en comun para obtener los datos
-    public void syncSpotifyData(User user){
+    public void syncSpotifyData(User user, String accessToken){
 
         //Get response of Spotify API
-        SpotifyApiResponse response = getApiResponse();
+        SpotifyApiResponse response = getApiResponse(accessToken);
 
         Set<String> artistIds = new HashSet<>();
         Set<String> albumIds = new HashSet<>();
@@ -118,7 +111,7 @@ public class SpotifyDataService {
                 }
             }
             //creo los nuevos artistas y luego los agrego a la lista de artistas del album
-            List<Artist> buildingAlbumArtists = artistService.buildArtists(newAlbumArtistsDTO);
+            List<Artist> buildingAlbumArtists = artistService.buildArtists(newAlbumArtistsDTO, accessToken);
             albumArtists.addAll(buildingAlbumArtists);
 
             //tambien los agrego a la lista de nuevos artistas y artistas existentes
@@ -157,7 +150,7 @@ public class SpotifyDataService {
             }
 
             //creo los nuevos artistas y luego los agrego a la lista de artistas de la cancion
-            List<Artist> buildingArtists = artistService.buildArtists(newSongArtistsDTO);
+            List<Artist> buildingArtists = artistService.buildArtists(newSongArtistsDTO, accessToken);
             songArtists.addAll(buildingArtists);
 
             //tambien los agrego a la lista de nuevos artistas y artistas existentes
