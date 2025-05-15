@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: Spotinsights
+
+  profiles:
+    active: prod
