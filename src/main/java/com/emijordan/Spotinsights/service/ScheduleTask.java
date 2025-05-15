@@ -40,17 +40,10 @@ public class ScheduleTask {
     @Autowired
     private SpotifyDataService spotifyDataService;
 
-    private boolean firstExecution = true;
-
-    @Scheduled(cron = "0 0 10 */5 * *", zone = "America/Buenos_Aires")
 //    @Scheduled(fixedRate = 300000)
+    @Scheduled(cron = "0 0 10 */5 * *", zone = "America/Buenos_Aires")
     public void updateReproductions(){
-        System.out.println("Obteniendo datos actualizados...");
-        //Desactivo la ejecucion automatica
-//        if (firstExecution){
-//            firstExecution=false;
-//            return;
-//        }
+        System.out.println("\nObteniendo datos actualizados");
 
         List<User> users = userRepository.findByDeleteAtIsNull();
         if (users != null) {
@@ -59,7 +52,7 @@ public class ScheduleTask {
 
                 try{
                     String newAccesToken = getNewAccesToken(refreshTokenDecrypt).accessToken();
-                    spotifyDataService.getNewData(newAccesToken, user);
+                    spotifyDataService.scheduledSyncForExistingUsers(newAccesToken, user);
                 } catch (RuntimeException e) {
                     System.out.println("Usuario dado de baja: " + user.getName());
                     user.setDeleteAt(LocalDateTime.now());
@@ -67,7 +60,7 @@ public class ScheduleTask {
                 }
             }
         }
-        System.out.println("Datos nuevos obtenidos correctamente");
+        System.out.println("Datos nuevos obtenidos correctamente\n");
     }
 
     public AccessTokenDTO getNewAccesToken(String refreshToken){

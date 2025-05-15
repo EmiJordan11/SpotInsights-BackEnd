@@ -17,7 +17,7 @@ public class DataSyncController {
     @PostMapping
     public ResponseEntity syncData(@RequestParam(name = "code") String code){
         spotifyAuthService.spotifyAuth(code);
-        System.out.println("Datos obtenidos correctamente");
+        System.out.println("Datos obtenidos correctamente\n");
         return ResponseEntity.noContent().build();
     }
 }

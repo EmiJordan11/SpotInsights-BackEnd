@@ -31,7 +31,7 @@ public class SpotifyAuthService {
         String response = getSpotifyTokens(code);
 
         TokenResponse spotifyTokens = Mappers.convertData(response, TokenResponse.class);
-        spotifyDataService.getData(spotifyTokens);
+        spotifyDataService.syncDataAfterLogin(spotifyTokens);
     }
 
     public String getSpotifyTokens(String code){

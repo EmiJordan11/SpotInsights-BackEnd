@@ -32,134 +32,24 @@ public class SpotifyDataService {
     @Autowired
     private ReproductionService reproductionService;
 
-    public void getData(TokenResponse spotifyTokens){
+    //Obtener data post login en el front
+    public void syncDataAfterLogin(TokenResponse spotifyTokens){
         //Set accessToken
         spotifyApiClient.setAuthToken(spotifyTokens.accessToken());
 
         //USER
         User user = userService.getUser(spotifyTokens.refreshToken());
 
-        //Get response of Spotify API
-        SpotifyApiResponse response = getApiResponse();
+        syncSpotifyData(user);
+    }
 
-        Set<String> artistIds = new HashSet<>();
-        Set<String> albumIds = new HashSet<>();
-        Set<String> songIds = new HashSet<>();
+    //Actualizar data (tarea automatizada)
+    public void scheduledSyncForExistingUsers(String accessToken, User user){
+        //Set accessToken
+        spotifyApiClient.setAuthToken(accessToken);
 
-        //almaceno las entidades existentes en los HashSet
-        for (ItemDTO i: response.items()){
-            i.song().artists().forEach(a-> artistIds.add(a.idSpotify()));
-            //add album id
-            albumIds.add(i.song().album().idSpotify());
-            //add song id
-            songIds.add(i.song().idSpotify());
-        }
+        syncSpotifyData(user);
 
-        //Almaceno las entidades existentes en un Map,donde la clave es el idSpotify y el valor es la entidad
-        Map<String, Artist> existingArtists = artistService.getExistingArtists(artistIds).stream()
-                .collect(Collectors.toMap(Artist::getIdSpotify, Function.identity()));
-
-        Map<String, Album> existingAlbums = albumService.getExistingAlbums(albumIds).stream()
-                .collect(Collectors.toMap(Album::getIdSpotify, Function.identity()));
-
-        Map<String, Song> existingSongs = songService.getExistingSongs(songIds).stream()
-                .collect(Collectors.toMap(Song::getIdSpotify, Function.identity()));
-
-        //Las entidades que no existen las guardo en una Lista para posteriormente perisistirlas por lote
-        List<Artist> newArtists = new ArrayList<>();
-        List<Album> newAlbums = new ArrayList<>();
-        List<Song> newSongs = new ArrayList<>();
-        List<Reproduction> newReproductions = new ArrayList<>();
-
-        //----------------------------------------------------------------------------------------------------------
-        for (ItemDTO i: response.items()){
-            //ALBUM ARTISTS
-            List<Artist> albumArtists = new ArrayList<>();
-
-            //guardo los artistas que no existen en una lista (ya sean del album o de la cancion)
-            List<ArtistDTO> newAlbumArtistsDTO = new ArrayList<>();
-            for (ArtistDTO artistDTO : i.song().album().artists()){
-                Artist existingAlbumArtist = existingArtists.get(artistDTO.idSpotify());
-                if (existingAlbumArtist!=null){
-                    albumArtists.add(existingAlbumArtist);
-                }
-                else{
-                    newAlbumArtistsDTO.add(artistDTO);
-                }
-            }
-            //creo los nuevos artistas y luego los agrego a la lista de artistas del album
-            List<Artist> buildingAlbumArtists = artistService.buildArtists(newAlbumArtistsDTO);
-            albumArtists.addAll(buildingAlbumArtists);
-
-            //tambien los agrego a la lista de nuevos artistas y artistas existentes
-            newArtists.addAll(buildingAlbumArtists);
-            buildingAlbumArtists.stream().forEach(a->existingArtists.put(a.getIdSpotify(),a));
-
-            //----------------------------------------------------------------------------------------------------------
-            //ALBUM
-            Album album = null;
-            Album existingAlbum = existingAlbums.get(i.song().album().idSpotify());
-            if (existingAlbum!=null){
-                album = existingAlbum;
-            }
-            else{
-                album = albumService.buildAlbum(i.song().album(), albumArtists);
-                newAlbums.add(album);
-                existingAlbums.put(album.getIdSpotify(), album); //lo agrego a los albumes existentes
-            }
-
-            //----------------------------------------------------------------------------------------------------------
-            //SONG ARTISTS
-            //defino una lista de los artistas de la cancion
-            List<Artist> songArtists = new ArrayList<>();
-            List<ArtistDTO> newSongArtistsDTO = new ArrayList<>();
-
-            for (ArtistDTO artistDTO: i.song().artists()){
-                Artist existingArtist = existingArtists.get(artistDTO.idSpotify());
-                //si existe, lo guardo en la lista de artistas existentes de esta cancion
-                if (existingArtist!=null) {
-                    songArtists.add(existingArtist);
-                }
-                //sino, lo guardo en la lista de nuevos artistas
-                else{
-                    newSongArtistsDTO.add(artistDTO);
-                }
-            }
-
-            //creo los nuevos artistas y luego los agrego a la lista de artistas de la cancion
-            List<Artist> buildingArtists = artistService.buildArtists(newSongArtistsDTO);
-            songArtists.addAll(buildingArtists);
-
-            //tambien los agrego a la lista de nuevos artistas y artistas existentes
-            newArtists.addAll(buildingArtists);
-            buildingArtists.stream().forEach(a-> existingArtists.put(a.getIdSpotify(), a));
-
-            //----------------------------------------------------------------------------------------------------------
-            //SONG
-            Song song = null;
-            Song existingSong = existingSongs.get(i.song().idSpotify());
-            if (existingSong!=null){
-                song = existingSong;
-            }
-            else{
-                song = songService.buildSong(i, album, songArtists);
-                newSongs.add(song);
-                existingSongs.put(song.getIdSpotify(), song);
-            }
-
-            //----------------------------------------------------------------------------------------------------------
-            //REPRODUCTION
-            Reproduction reproduction = reproductionService.buildReproduction(i, user, song);
-            newReproductions.add(reproduction);
-
-        }
-
-        //Guardo por lotes las entidades nuevas
-        artistService.saveAll(newArtists);
-        albumService.saveAll(newAlbums);
-        songService.saveAll(newSongs);
-
-        newReproductions.stream().forEach(r->reproductionService.saveReproduction(r));//no necesariamente son todas nuevas, el metodo verifica si no existen con anterioridad
     }
 
     public SpotifyApiResponse getApiResponse(){
@@ -168,10 +58,9 @@ public class SpotifyDataService {
         return response;
     }
 
-    public void getNewData(String accessToken, User user){
-        System.out.println("Obteniendo la nueva informacion...");
-        //Set accessToken
-        spotifyApiClient.setAuthToken(accessToken);
+
+    //Logica en comun para obtener los datos
+    public void syncSpotifyData(User user){
 
         //Get response of Spotify API
         SpotifyApiResponse response = getApiResponse();
@@ -295,5 +184,6 @@ public class SpotifyDataService {
 
         newReproductions.stream().forEach(r->reproductionService.saveReproduction(r));//no necesariamente son todas nuevas, el metodo verifica si no existen con anterioridad
     }
+
 
 }
