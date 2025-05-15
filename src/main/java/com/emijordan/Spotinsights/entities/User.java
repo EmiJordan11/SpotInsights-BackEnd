@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,6 +22,7 @@ public class User {
     private String name;
     private String idSpotify;
     private String refreshToken;
+    private LocalDateTime deleteAt;
 
     public User(UserDTO userDTO, String userRefreshToken) {
         this.name = userDTO.name();

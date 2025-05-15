@@ -25,9 +25,6 @@ public class UserService {
 
     public User getUser(String userRefreshToken){
         UserDTO userDTO = getUserFromApi();
-        //BORRAR
-        System.out.println("Refresh Token: " + userRefreshToken);
-        //
         String encryptRefreshToken = tokenService.encryptToken(userRefreshToken);
 
         User user = saveUser(userDTO, encryptRefreshToken);
@@ -41,8 +38,13 @@ public class UserService {
             User persistedUser = userRepository.save(user);
             return persistedUser;
         }
+
+        //setteo el nuevo refresh token y elimino la fecha de baja si es que era distinta de null (sino no afecta, sigue siendo null)
+        existingUser.get().setDeleteAt(null);
         existingUser.get().setRefreshToken(encryptRefreshToken); //actualizo el refresh token
-        return existingUser.get();
+
+        User updateUser = userRepository.save(existingUser.get());
+        return updateUser;
     }
 
     public UserDTO getUserFromApi(){

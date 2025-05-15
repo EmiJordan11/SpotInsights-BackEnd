@@ -17,6 +17,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -41,26 +42,29 @@ public class ScheduleTask {
 
     private boolean firstExecution = true;
 
-//    @Scheduled(cron = "0 10 */5 * *", zone = "America/Argetina/Buenos_Aires")
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(cron = "0 0 10 */5 * *", zone = "America/Buenos_Aires")
+//    @Scheduled(fixedRate = 300000)
     public void updateReproductions(){
+        System.out.println("Obteniendo datos actualizados...");
         //Desactivo la ejecucion automatica
-        if (firstExecution){
-            firstExecution=false;
-            return;
-        }
+//        if (firstExecution){
+//            firstExecution=false;
+//            return;
+//        }
 
-        System.out.println("TAREA AUTOMATIZADA");
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByDeleteAtIsNull();
         if (users != null) {
             for (User user : users){
                 String refreshTokenDecrypt = tokenService.decryptToken(user.getRefreshToken());
-                System.out.println("Refresh token desencriptado: " + refreshTokenDecrypt);
 
-                String newAccesToken = getNewAccesToken(refreshTokenDecrypt).accessToken();
-                System.out.println("New Access Token: " + newAccesToken);
-
-                spotifyDataService.getNewData(newAccesToken, user);
+                try{
+                    String newAccesToken = getNewAccesToken(refreshTokenDecrypt).accessToken();
+                    spotifyDataService.getNewData(newAccesToken, user);
+                } catch (RuntimeException e) {
+                    System.out.println("Usuario dado de baja: " + user.getName());
+                    user.setDeleteAt(LocalDateTime.now());
+                    userRepository.save(user);
+                }
             }
         }
         System.out.println("Datos nuevos obtenidos correctamente");
