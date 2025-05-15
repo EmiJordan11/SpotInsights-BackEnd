@@ -2,9 +2,12 @@ package com.emijordan.Spotinsights.service;
 
 import com.emijordan.Spotinsights.client.Mappers;
 import com.emijordan.Spotinsights.client.SpotifyApiClient;
+import com.emijordan.Spotinsights.controller.DataSyncController;
 import com.emijordan.Spotinsights.dto.*;
 import com.emijordan.Spotinsights.entities.*;
 import com.emijordan.Spotinsights.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,8 @@ public class SpotifyDataService {
     @Autowired
     private ReproductionService reproductionService;
 
+    private static final Logger logger = LoggerFactory.getLogger(DataSyncController.class);
+
     //Obtener data post login en el front
     public void syncDataAfterLogin(TokenResponse spotifyTokens){
         //Set accessToken
@@ -39,6 +44,8 @@ public class SpotifyDataService {
 
         //USER
         User user = userService.getUser(spotifyTokens.refreshToken());
+
+        logger.info("Nuevo usuario registrado: "+user.getName());
 
         syncSpotifyData(user);
     }

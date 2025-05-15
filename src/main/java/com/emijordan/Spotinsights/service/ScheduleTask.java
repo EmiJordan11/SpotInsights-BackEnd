@@ -1,10 +1,13 @@
 package com.emijordan.Spotinsights.service;
 
 import com.emijordan.Spotinsights.client.Mappers;
+import com.emijordan.Spotinsights.controller.DataSyncController;
 import com.emijordan.Spotinsights.dto.AccessTokenDTO;
 import com.emijordan.Spotinsights.entities.User;
 import com.emijordan.Spotinsights.repository.UserRepository;
 import com.emijordan.Spotinsights.service.auth.TokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,10 +43,12 @@ public class ScheduleTask {
     @Autowired
     private SpotifyDataService spotifyDataService;
 
+    private static final Logger logger = LoggerFactory.getLogger(DataSyncController.class);
+
 //    @Scheduled(fixedRate = 300000)
     @Scheduled(cron = "0 0 10 */5 * *", zone = "America/Buenos_Aires")
     public void updateReproductions(){
-        System.out.println("\nObteniendo datos actualizados");
+        logger.info("🟢 INICIO DE LA TAREA AUTOMATIZADA: Obteniendo nuevos datos\n");
 
         List<User> users = userRepository.findByDeleteAtIsNull();
         if (users != null) {
@@ -54,13 +59,14 @@ public class ScheduleTask {
                     String newAccesToken = getNewAccesToken(refreshTokenDecrypt).accessToken();
                     spotifyDataService.scheduledSyncForExistingUsers(newAccesToken, user);
                 } catch (RuntimeException e) {
-                    System.out.println("Usuario dado de baja: " + user.getName());
+                    logger.debug("Usuario dado de baja: " + user.getName());
+
                     user.setDeleteAt(LocalDateTime.now());
                     userRepository.save(user);
                 }
             }
         }
-        System.out.println("Datos nuevos obtenidos correctamente\n");
+        logger.info("\n🔴 FIN DE LA TAREA AUTOMATIZADA: Datos nuevos obtenidos correctament\n");
     }
 
     public AccessTokenDTO getNewAccesToken(String refreshToken){
