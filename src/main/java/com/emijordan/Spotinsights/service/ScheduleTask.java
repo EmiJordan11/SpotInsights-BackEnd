@@ -45,8 +45,6 @@ public class ScheduleTask {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSyncController.class);
 
-//    @Scheduled(fixedRate = 300000)
-    @Scheduled(cron = "0 0 10 */5 * *", zone = "America/Buenos_Aires")
     public void updateReproductions(){
         logger.info("🟢 INICIO DE LA TAREA AUTOMATIZADA: Obteniendo nuevos datos\n");
 
